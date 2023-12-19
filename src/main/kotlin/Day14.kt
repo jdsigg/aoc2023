@@ -1,5 +1,5 @@
 import java.io.File
-import kotlin.math.ceil
+import kotlin.math.floor
 
 class Day14 {
     companion object {
@@ -108,42 +108,78 @@ class Day14 {
             return getNorthWeight(newDish)
         }
 
-        private fun tryPlace(seen: MutableMap<String, Int>, str: String, i: Int): Int {
-            return if (seen.containsKey(str)) {
-                seen[str]!!
+        private fun place(
+            graph: MutableMap<String, MutableMap<String, Int>>,
+            curr: String,
+            next: String,
+            index: Int
+        ): Int {
+            val children: MutableMap<String, Int>? = graph[curr]
+            if (children == null) {
+                // We've never moved from curr to anything before.
+                graph[curr] = mutableMapOf(next to index)
+                return -1
+            }
+
+            // Make sure we aren't going back to where we've been.
+            return if (children[next] != null) {
+                // This is a cycle.
+                children[next]!!
             } else {
-                seen[str] = i
+                children[next] = index
                 -1
             }
         }
 
         private fun getLatestCycleStart(cycleStart: Int, cycleEnd: Int): Int {
             val cycleSize = cycleEnd - cycleStart
-            // My first cycle seems to happen at i = 125 and repeats at i = 151
-            // Cycle length = (151 - 125) = 26
-            // First time the cycle starts = 125
-            // Therefore, the cycle should repeat at = 1_000_000_000 + 125 - (26 * (ceil(125 / 26)))
-            // It seems to not, so I am missing something, but I don't know what.
-
-            // After some trial/error, poking around +/- 1_000_000_000 got me a correct answer at -12.
-            // I don't know why -12.
-            return 1_000_000_000 - 12 + cycleStart - (cycleSize * (ceil(cycleStart.toDouble() / cycleSize))).toInt()
+            val spaceLeft = 1_000_000_000 - cycleEnd
+            // How many cycles can we do in spaceLeft without crossing over 1_000_000_000?
+            val numCycles = floor(spaceLeft.toDouble() / cycleSize).toInt()
+            return cycleEnd + numCycles * cycleSize
         }
 
         fun part2(dish: Array<Array<String>>): Int {
             val newDish = copy(dish)
-            val seen: MutableMap<String, Int> = mutableMapOf(hash(newDish) to 0)
-            var i = 1
-            while (i <= 1_000_000_000) {
+            val graph: MutableMap<String, MutableMap<String, Int>> = mutableMapOf()
+            var curr = hash(newDish)
+            var next: String; var p: Int; var i = 0
+            while (i < 1_000_000_000) {
                 tiltNorth(newDish)
-                tiltWest(newDish)
-                tiltSouth(newDish)
-                tiltEast(newDish)
-                val tP = tryPlace(seen, hash(newDish), i)
-                if (tP != -1) {
-                    i = getLatestCycleStart(tP, i)
-                    seen.clear()
+                next = "N${hash(newDish)}"
+                p = place(graph, curr, next, i)
+                if (p != -1) {
+                    graph.clear()
+                    i = getLatestCycleStart(p, i)
                 }
+                curr = next
+
+                tiltWest(newDish)
+                next = "W${hash(newDish)}"
+                p = place(graph, curr, next, i)
+                if (p != -1) {
+                    graph.clear()
+                    i = getLatestCycleStart(p, i)
+                }
+                curr = next
+
+                tiltSouth(newDish)
+                next = "S${hash(newDish)}"
+                p = place(graph, curr, next, i)
+                if (p != -1) {
+                    graph.clear()
+                    i = getLatestCycleStart(p, i)
+                }
+                curr = next
+
+                tiltEast(newDish)
+                next = "E${hash(newDish)}"
+                p = place(graph, curr, next, i)
+                if (p != -1) {
+                    graph.clear()
+                    i = getLatestCycleStart(p, i)
+                }
+                curr = next
                 i++
             }
             return getNorthWeight(newDish)
@@ -154,7 +190,6 @@ class Day14 {
 fun main() {
     val dish: Array<Array<String>> =
         File("src/inputs/day14.txt").readLines().map { it.chunked(1).toTypedArray() }.toTypedArray()
-
     println("Part 1: ${Day14.part1(dish)}")
     println("Part 2: ${Day14.part2(dish)}")
 }
