@@ -59,7 +59,6 @@ class Day19 {
              * The right rule, if any, is the non-matching rule.
              */
             fun matches(rating: RangedRating): Pair<RangedRating?, RangedRating?> {
-                // x, m, a, and s ranges
                 if (this.category == INVALID_CATEGORY) {
                     // This is just a label and is a guaranteed match.
                     return Pair(rating, null)
@@ -148,8 +147,12 @@ class Day19 {
 
         }
 
+        /**
+         * Returns a Rule from a string.
+         *
+         * Rule strings always look like "x>N:label".
+         */
         private fun makeRule(rule: String): Rule {
-            // Strings look like "x>N:label".
             val firstColon = rule.indexOf(':')
             return if (firstColon == -1) {
                 // These are terminal / catch-all rules e.g. "A", "R", and "qqz"
