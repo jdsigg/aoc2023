@@ -149,8 +149,6 @@ class Day19 {
 
         /**
          * Returns a Rule from a string.
-         *
-         * Rule strings always look like "x>N:label".
          */
         private fun makeRule(rule: String): Rule {
             val firstColon = rule.indexOf(':')
@@ -179,8 +177,6 @@ class Day19 {
 
         /**
          * Return a Rating from a string.
-         *
-         * Ratings look like "{x=X,m=M,a=A,s=S}".
          */
         fun makeRating(line: String): Rating {
             val ratingMap: Map<String, Long> = line.substring(1, line.length - 1).split(',').associate {
