@@ -98,7 +98,7 @@ class Day17 {
             // All seen <position, direction, streak> groupings.
             val seen: MutableSet<Triple<Pair<Int, Int>, Direction, Int>> = mutableSetOf()
             // Min-heap (see Crucible::compareTo).
-            val pQueue = PriorityQueue<Crucible>();
+            val pQueue = PriorityQueue<Crucible>()
             // Start moving right and down from the top-left corner.
             pQueue.addAll(listOf(Direction.RIGHT, Direction.DOWN).map { Crucible(Pair(0, 0), it, 1, 0) })
 
